@@ -73,6 +73,28 @@ extension TaskTableViewController {
     
 }
 
+
+// MARK: - Table view data source
+
+extension TaskTableViewController: NSFetchedResultsControllerDelegate {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        switch type {
+        case .insert:
+            if indexPath != nil {
+                tableView.insertRows(at: [indexPath!], with: .bottom)
+            }
+        case .delete:
+            tableView.deleteRows(at: [indexPath!], with: .middle)
+        case .move:
+            break
+        case .update:
+            break
+        @unknown default:
+            break
+        }
+    }
+}
+
 private extension TaskTableViewController {
     func setupNavigationBar() {
         title = "Task List"
@@ -142,13 +164,11 @@ private extension TaskTableViewController {
     
     func save(taskTitle: String) {
         
-        // Сохраняем в модель
         let task = TaskManager(context: store.persistentContainer.viewContext)
         task.taskTitle = taskTitle
         
         store.saveContext()
         
-        // Для добавления в таблицу
         guard let fetchObject = store.fetchResultController.fetchedObjects else { return }
         let index = IndexPath(row: fetchObject.count - 1, section: 0)
         tableView.insertRows(at: [index], with: .automatic)
@@ -156,25 +176,3 @@ private extension TaskTableViewController {
         
     }
 }
-
-// MARK: - Table view data source
-
-extension TaskTableViewController: NSFetchedResultsControllerDelegate {
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if indexPath != nil {
-                tableView.insertRows(at: [indexPath!], with: .bottom)
-            }
-        case .delete:
-            tableView.deleteRows(at: [indexPath!], with: .middle)
-        case .move:
-            break
-        case .update:
-            break
-        @unknown default:
-            break
-        }
-    }
-}
-
